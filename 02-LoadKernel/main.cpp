@@ -4,41 +4,16 @@
 #include <assert.h>
 #include <fstream>
 #include <string>
+#include <OpenCLHelper.h>
 
 int main() {
-	std::vector<cl::Platform> platforms;
-	cl::Platform::get(&platforms);
 
-	auto platform = platforms.front();
+	auto program = CreateProgram("./HelloWorld.cl");
+	auto context = program.getInfo<CL_PROGRAM_CONTEXT>();
+	auto devices = context.getInfo<CL_CONTEXT_DEVICES>();
+	auto& device  = devices.front();
 
-	std::vector<cl::Device> devices;
-	platform.getDevices(CL_DEVICE_TYPE_GPU,&devices);
-
-	auto device = devices.front();
-	auto name    = device.getInfo<CL_DEVICE_NAME>();
-	auto vendor  = device.getInfo<CL_DEVICE_VENDOR>();
-	auto version = device.getInfo<CL_DRIVER_VERSION>();
-
-	std::cout << "Name    :"<< name    << std::endl;
-	std::cout << "Vendor  :"<< vendor  << std::endl;
-	std::cout << "Version :"<< version << std::endl;
-
-	std::ifstream helloWorldFile("./HelloWorld.cl");
-	std::string src((std::istreambuf_iterator<char>(helloWorldFile)),
-					 std::istreambuf_iterator<char>());
-
-	std::cout << "Source Cl code:" << std::endl;
-	std::cout << src << std::endl;
-	
-	cl::Program::Sources sources(1,std::make_pair(src.c_str() , src.length() + 1));
-
-	cl::Context context(device);
-	cl::Program program(context,sources);
-
-	auto err =program.build("-cl-std=CL1.2");
-	if (err != CL_SUCCESS) {
-		std::cerr << "Program build failed" <<std::endl;
-	}
+	cl_int err;
 
 	char buf[16];
 	cl::Buffer memBuf(context,CL_MEM_WRITE_ONLY | CL_MEM_HOST_READ_ONLY, sizeof(buf));

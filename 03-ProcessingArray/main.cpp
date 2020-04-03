@@ -14,7 +14,7 @@ int main() {
 	auto& device  = devices.front();
 
 	std::vector<int> vec(1024);
-	for(int i=0;i<vec.size();i++) vec[i] = i;
+	//for(int i=0;i<vec.size();i++) vec[i] = i;
 
 	cl::Buffer inBuf(context,CL_MEM_READ_ONLY | CL_MEM_HOST_NO_ACCESS | CL_MEM_COPY_HOST_PTR, sizeof(int) * vec.size(),vec.data());
 	cl::Buffer outBuf(context,CL_MEM_WRITE_ONLY | CL_MEM_HOST_READ_ONLY , sizeof(int) * vec.size());
@@ -31,6 +31,8 @@ int main() {
 	}
 
 	cl::CommandQueue queue(context);
+
+	queue.enqueueFillBuffer(inBuf,3 ,sizeof(int) * 10 , sizeof(int)*(vec.size()-10));
 	queue.enqueueNDRangeKernel(kernel,cl::NullRange, cl::NDRange(vec.size()));
 	queue.enqueueReadBuffer(outBuf,CL_FALSE,0,sizeof(int)*vec.size(),vec.data());
 

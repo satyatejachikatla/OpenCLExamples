@@ -9,7 +9,7 @@
 
 int main() {
 
-	auto program = CreateProgram("./ProcessArray.cl");
+	auto program = CreateProgram("./ProcessMultiDimentionalArray.cl");
 	auto context = program.getInfo<CL_PROGRAM_CONTEXT>();
 	auto devices = context.getInfo<CL_CONTEXT_DEVICES>();
 	auto& device  = devices.front();

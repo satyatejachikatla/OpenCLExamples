@@ -5,6 +5,7 @@
 #include <fstream>
 #include <string>
 #include <array>
+#include <numeric>
 #include <OpenCLHelper.h>
 
 int main() {
@@ -14,7 +15,7 @@ int main() {
 	auto devices = context.getInfo<CL_CONTEXT_DEVICES>();
 	auto& device  = devices.front();
 
-	std::vector<int> vec(1024);  // 256 for my gpu, will match with workGorupSize or be more, try changing it to > 256
+	std::vector<int> vec(512);  // atleast 256 for my gpu, will match with workGorupSize or be more, try changing it to > 256
 	for(int i=0;i<vec.size();i++) vec[i] =i; 
 
 	cl_int err;
@@ -26,6 +27,7 @@ int main() {
 	auto workGroupSize = kernel.getWorkGroupInfo<CL_KERNEL_WORK_GROUP_SIZE>(device);
 	auto numWorkGroups  = vec.size() / workGroupSize;
 
+	std::cout << "Vec Size is :" <<  vec.size() << std::endl;
 	std::cout << "Work Group Size is :" <<  workGroupSize << std::endl;
 
 	cl::Buffer buf(context,CL_MEM_READ_ONLY | CL_MEM_HOST_NO_ACCESS | CL_MEM_COPY_HOST_PTR, sizeof(int) * vec.size(), vec.data());
@@ -44,12 +46,11 @@ int main() {
 	queue.enqueueNDRangeKernel(kernel,cl::NullRange, cl::NDRange(vec.size()),cl::NDRange(workGroupSize));
 	queue.enqueueReadBuffer(outBuf,CL_TRUE,0,sizeof(int)*outVec.size(),outVec.data());
 
-	// change the logic of output based on the vec size
-	for(int i=0 ;i < outVec.size() ; i++) {
-		if(outVec[i] == 0)
-			break;
-		std::cout << "Sum at "<< i <<" :" << outVec[i] << std::endl;
-	}
+	//Accumilator just to se the output
+	//If we wanted we could run the kernel again to reduce this even more or stop based on some logic
+
+	auto sum = std::accumulate(outVec.cbegin(),outVec.cend(),0);
+	std::cout << "Total Sum is : " << sum << std::endl;
 
 	return 0;
 }

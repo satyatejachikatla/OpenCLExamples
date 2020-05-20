@@ -1,10 +1,12 @@
-CXX ?= g++
+CXX ?= g++ -std=c++11 
 AR  ?= ar
 MAKE ?= make
 
-LIBS := -lOpenCL
+LIBS := 	-L/opt/intel/system_studio_2020/opencl-sdk/lib64/ \
+			-lOpenCL
 
-CXXFLAGS := -I. \
+CXXFLAGS := -I/opt/intel/system_studio_2020/opencl-sdk/include/ \
+			-I. \
 			-Wl,-no-as-needed
 
 BUILT_LIBS := \
@@ -18,8 +20,8 @@ all:
 	$(MAKE) app
 
 app:
-	$(CXX) $(CXXFLAGS) -c main.cpp 
-	$(CXX) $(OBJS) $(LIBS) $(BUILT_LIBS) -o run
+	$(CXX) $(CXXFLAGS) $(LIBS)  -c main.cpp 
+	$(CXX) $(CXXFLAGS) $(LIBS) $(OBJS)  $(BUILT_LIBS) -o run
 
 clean:
 	rm -f run
